@@ -1,0 +1,14 @@
+# System configuration for the realtime sensor-actuator system
+[system]
+sample_rate_hz = 100
+window_size = 5
+anomaly_threshold = 2.5
+
+[actuator]
+p_gain = 1.0
+i_gain = 0.0
+d_gain = 0.0
+
+[ipc]
+channel_capacity = 1024
+
