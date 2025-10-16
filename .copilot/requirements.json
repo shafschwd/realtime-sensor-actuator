@@ -1,0 +1,254 @@
+{
+  "assignment": "CT087-3-3 Realtime Systems",
+  "module": "Asia Pacific University",
+  "project": "realtime-sensor-actuator",
+  "goals": [
+    "Design, implement, and evaluate a simulated real-time system in Rust",
+    "Closed-loop sensor-actuator with timing constraints",
+    "Benchmark latency, jitter, throughput",
+    "Demonstrate safe concurrency and IPC",
+    "Compare async vs multi-threading (optional advanced)"
+  ],
+  "learning_outcomes": [
+    "Discuss real-time systems: asynchronous operation, concurrency, robustness",
+    "Design systematic approaches for real-time systems",
+    "Implement and evaluate a simulated real-time system"
+  ],
+  "requirements": [
+    {
+      "id": "SYS-ARCH-001",
+      "title": "System Architecture defined",
+      "description": "A closed-loop real-time sensor-actuator system is described and implemented.",
+      "evidence": [
+        "README.md",
+        "src/main.rs",
+        "src/sensor/*",
+        "src/actuator/*",
+        "src/ipc/*"
+      ],
+      "verification": [
+        "README.md contains an architecture overview section",
+        "src/main.rs wires sensor→ipc→actuator→feedback"
+      ]
+    },
+    {
+      "id": "RUST-STRUCT-002",
+      "title": "Modular Rust project structure",
+      "description": "Project includes modules for sensor, actuator, IPC, benchmarking, async and threaded variants, visualization, and config.",
+      "evidence": [
+        "Cargo.toml",
+        "src/sensor/{generator.rs,filter.rs,anomaly.rs}",
+        "src/actuator/{controller.rs,manager.rs}",
+        "src/ipc/{channels.rs,shared_resource.rs}",
+        "src/benchmark/{metrics.rs,analysis.rs}",
+        "src/async_impl/{sensor_task.rs,actuator_task.rs}",
+        "src/threaded_impl/{sensor_thread.rs,actuator_thread.rs}",
+        "src/visualization/{dashboard.rs}",
+        "src/config.rs"
+      ],
+      "verification": [
+        "Cargo builds without missing modules"
+      ]
+    },
+    {
+      "id": "CONCUR-CRATES-003",
+      "title": "Concurrency crates selected",
+      "description": "Appropriate crates chosen for concurrency and synchronization.",
+      "evidence": [
+        "Cargo.toml: tokio, crossbeam, parking_lot, rayon (optional)"
+      ],
+      "verification": [
+        "grep -q 'tokio' Cargo.toml",
+        "grep -q 'crossbeam' Cargo.toml",
+        "grep -q 'parking_lot' Cargo.toml"
+      ]
+    },
+    {
+      "id": "IPC-004",
+      "title": "IPC and data sharing",
+      "description": "Use channels for IPC and shared state via Arc<Mutex/RwLock>.",
+      "evidence": [
+        "src/ipc/channels.rs",
+        "src/ipc/shared_resource.rs"
+      ],
+      "verification": [
+        "channels.rs defines sensor_tx/sensor_rx and feedback_tx/feedback_rx",
+        "shared_resource.rs uses Arc<RwLock> and Arc<Mutex>"
+      ]
+    },
+    {
+      "id": "LOG-BENCH-005",
+      "title": "Logging and benchmarking",
+      "description": "Structured logging and latency/jitter/throughput metrics collection.",
+      "evidence": [
+        "Cargo.toml: tracing, hdrhistogram, criterion (dev)",
+        "src/benchmark/metrics.rs",
+        "benches/system_benchmark.rs",
+        "src/main.rs (report printing)"
+      ],
+      "verification": [
+        "cargo bench runs and completes",
+        "main logs metrics P50/P99 and missed deadlines"
+      ]
+    },
+    {
+      "id": "CTRL-PID-006",
+      "title": "PID control implemented",
+      "description": "Actuator applies PID to sensor values with anti-windup.",
+      "evidence": [
+        "src/actuator/controller.rs",
+        "src/actuator/manager.rs"
+      ],
+      "verification": [
+        "PIDController::compute present and used by ActuatorManager::update"
+      ]
+    },
+    {
+      "id": "SENSOR-A-007",
+      "title": "Sensor simulator with filtering and anomaly detection",
+      "description": "Generates data, filters noise, detects anomalies, sends within deadlines.",
+      "evidence": [
+        "src/sensor/generator.rs",
+        "src/sensor/filter.rs",
+        "src/sensor/anomaly.rs",
+        "src/threaded_impl/sensor_thread.rs"
+      ],
+      "verification": [
+        "MovingAverageFilter::filter called in sensor loop",
+        "AnomalyDetector::detect called and logs on anomaly"
+      ]
+    },
+    {
+      "id": "ACTUATOR-B-008",
+      "title": "Actuator commander with deadlines",
+      "description": "Receives sensor input, applies PID, sends feedback, records e2e latency.",
+      "evidence": [
+        "src/threaded_impl/actuator_thread.rs",
+        "src/ipc/channels.rs (ActuatorFeedback)"
+      ],
+      "verification": [
+        "metrics.record_e2e called with latency from reading.timestamp"
+      ]
+    },
+    {
+      "id": "MODEL-COMPARE-009",
+      "title": "Async vs threading integration",
+      "description": "Both models provided; rationale documented.",
+      "evidence": [
+        "src/threaded_impl/*",
+        "src/async_impl/*",
+        "README.md (rationale section)"
+      ],
+      "verification": [
+        "async_impl contains sensor_task.rs and actuator_task.rs"
+      ],
+      "optional": true
+    },
+    {
+      "id": "SYNC-SAFE-010",
+      "title": "Shared resource synchronization and contention",
+      "description": "Safe synchronization patterns, and demonstration of potential contention.",
+      "evidence": [
+        "src/ipc/shared_resource.rs"
+      ],
+      "verification": [
+        "DiagnosticLog uses RwLock; ConfigBuffer uses Mutex"
+      ]
+    },
+    {
+      "id": "TIMING-011",
+      "title": "Timing, latency, jitter, throughput",
+      "description": "Metrics collection and reporting for latency distributions and deadlines.",
+      "evidence": [
+        "src/benchmark/metrics.rs",
+        "src/main.rs (metrics.report)"
+      ],
+      "verification": [
+        "MetricsReport fields include p50/p99 and missed_deadlines"
+      ]
+    },
+    {
+      "id": "ADV-FAULTS-012",
+      "title": "Fault injection and fail-safe",
+      "description": "Simulated dropouts or delays and fail-safe mode.",
+      "evidence": [
+        "src/threaded_impl/actuator_thread.rs (fail-safe on timeout)",
+        "sensor thread can be extended to sleep/drop messages"
+      ],
+      "verification": [
+        "recv_timeout used with fail-safe branch"
+      ],
+      "optional": true
+    },
+    {
+      "id": "ADV-LOAD-013",
+      "title": "CPU load simulation",
+      "description": "Background CPU load to stress timing.",
+      "evidence": [
+        "rayon in Cargo.toml",
+        "optional load generator function (to be added)"
+      ],
+      "verification": [
+        "Presence of rayon and a load generator call in main (optional)"
+      ],
+      "optional": true
+    },
+    {
+      "id": "ADV-VIS-014",
+      "title": "Visualization",
+      "description": "Generate latency chart image from metrics.",
+      "evidence": [
+        "src/benchmark/analysis.rs",
+        "src/visualization/dashboard.rs"
+      ],
+      "verification": [
+        "latency.png generated after run"
+      ],
+      "optional": true
+    },
+    {
+      "id": "ADV-BROKER-015",
+      "title": "Message broker integration",
+      "description": "Integrate RabbitMQ, MQTT, or ZeroMQ publisher/subscriber.",
+      "evidence": [
+        "Cargo.toml has lapin/rumqttc/zeromq (commented or enabled)",
+        "async publisher/consumer stubs (to be added)"
+      ],
+      "verification": [
+        "Feature-gated example compiles when enabled"
+      ],
+      "optional": true
+    },
+    {
+      "id": "TESTS-016",
+      "title": "Tests and benches",
+      "description": "Include unit/integration tests and Criterion benchmarks.",
+      "evidence": [
+        "tests/integration_test.rs",
+        "tests/fault_injection_test.rs",
+        "benches/system_benchmark.rs"
+      ],
+      "verification": [
+        "cargo test --release passes",
+        "cargo bench runs"
+      ]
+    }
+  ],
+  "commands": {
+    "build": "cargo build --release",
+    "run": "cargo run --release",
+    "test": "cargo test --release",
+    "bench": "cargo bench"
+  },
+  "artifacts": [
+    "latency.png",
+    "console logs with metrics report"
+  ],
+  "acceptance_criteria": [
+    "Project builds and runs for at least 10 seconds producing metrics output",
+    "End-to-end latency and missed deadlines reported",
+    "Anomaly detection produces at least one log line under typical runtime",
+    "Actuator feedback messages transmitted and received",
+    "Optional: latency chart generated"
+  ]
+}

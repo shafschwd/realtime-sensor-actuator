@@ -1,22 +1,28 @@
-// Configuration loading/management (minimal stub)
-#[derive(Debug, Clone)]
-pub struct SystemConfig {
-    pub sample_rate_hz: u32,
-    pub window_size: usize,
-    pub anomaly_threshold: f64,
+use serde::Deserialize;
+use std::fs;
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct RuntimeConfig {
+    pub sensor_interval_ms: u64,
+    pub processing_deadline_ms: f64,
+    pub transmission_deadline_ms: f64,
+    pub fail_safe_enabled: bool,
 }
 
-impl Default for SystemConfig {
+impl Default for RuntimeConfig {
     fn default() -> Self {
         Self {
-            sample_rate_hz: 100,
-            window_size: 5,
-            anomaly_threshold: 2.5,
+            sensor_interval_ms: 5,
+            processing_deadline_ms: 0.2,
+            transmission_deadline_ms: 0.1,
+            fail_safe_enabled: false,
         }
     }
 }
 
-pub fn load_default() -> SystemConfig {
-    SystemConfig::default()
+pub fn load_config(path: &str) -> RuntimeConfig {
+    match fs::read_to_string(path) {
+        Ok(s) => toml::from_str::<RuntimeConfig>(&s).unwrap_or_default(),
+        Err(_) => RuntimeConfig::default(),
+    }
 }
-

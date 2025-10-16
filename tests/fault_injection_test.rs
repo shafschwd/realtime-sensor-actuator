@@ -1,15 +1,10 @@
-// Fault tolerance tests (placeholder)
-#[test]
-fn fault_injection_placeholder() {
-    assert_eq!(1 + 1, 2);
-}
-// Public API exports for the realtime-sensor-actuator library
-pub mod config;
-pub mod sensor;
-pub mod actuator;
-pub mod ipc;
-pub mod benchmark;
-pub mod async_impl;
-pub mod threaded_impl;
-pub mod visualization;
+use realtime_sensor_actuator::sensor::generator::SensorGenerator;
 
+#[test]
+fn disturbance_changes_baseline() {
+    let mut gen = SensorGenerator::new(1);
+    let before = gen.generate().force;
+    gen.inject_disturbance(5.0, 0.0);
+    let after = gen.generate().force;
+    assert!((after - before).abs() > 1.0);
+}
