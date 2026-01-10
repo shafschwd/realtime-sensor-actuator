@@ -1,5 +1,5 @@
 use crate::actuator::manager::ActuatorManager;
-use crate::ipc::channels::{SystemChannels, ActuatorFeedback};
+use crate::ipc::channels::{SystemChannels, ActuatorFeedback, ActuatorStatus};
 use crate::benchmark::metrics::TimingMetrics;
 use std::time::Instant;
 
@@ -14,9 +14,16 @@ pub async fn actuator_task(channels: SystemChannels, metrics: TimingMetrics) {
         let cycle_start = Instant::now();
 
         manager.update(&reading);
-        let commands = manager.get_commands();
+        let _commands = manager.get_commands();
 
-        let feedback = ActuatorFeedback { timestamp: Instant::now(), commands: commands.clone(), status: "OK".to_string() };
+        let feedback = ActuatorFeedback {
+            timestamp: Instant::now(),
+            actuator_name: "Combined".to_string(),
+            error: 0.0,
+            control: 0.0,
+            status: ActuatorStatus::Normal,
+            cycle_id: reading.sequence_id,
+        };
         let _ = channels.feedback_tx.send(feedback);
 
         let e2e_latency = cycle_start.duration_since(reading.timestamp);

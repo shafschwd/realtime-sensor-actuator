@@ -10,6 +10,7 @@ pub struct PIDController {
     setpoint: f32,
     integral: f32,
     prev_error: f32,
+    last_error: f32,  // Store the last computed error
     prev_time: Option<Instant>,
 
     // Anti-windup
@@ -25,6 +26,7 @@ impl PIDController {
             setpoint,
             integral: 0.0,
             prev_error: 0.0,
+            last_error: 0.0,
             prev_time: None,
             integral_max: 100.0,
         }
@@ -35,6 +37,7 @@ impl PIDController {
 
         // Calculate error
         let error = self.setpoint - measured_value;
+        self.last_error = error;
 
         // Calculate dt
         let dt = if let Some(prev) = self.prev_time {
@@ -67,6 +70,10 @@ impl PIDController {
         p + i + d
     }
 
+    pub fn get_error(&self) -> f32 {
+        self.last_error
+    }
+
     #[allow(dead_code)]
     pub fn set_setpoint(&mut self, setpoint: f32) {
         self.setpoint = setpoint;
@@ -76,6 +83,7 @@ impl PIDController {
     pub fn reset(&mut self) {
         self.integral = 0.0;
         self.prev_error = 0.0;
+        self.last_error = 0.0;
         self.prev_time = None;
     }
 }

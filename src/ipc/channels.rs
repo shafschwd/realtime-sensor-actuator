@@ -4,7 +4,7 @@ use crate::sensor::generator::SensorReading;
 
 #[derive(Clone)]
 pub struct SystemChannels {
-    // Sensor -> Actuator
+    // Sensor -> Dispatcher
     pub sensor_tx: Sender<SensorReading>,
     pub sensor_rx: Arc<Receiver<SensorReading>>,
 
@@ -14,12 +14,30 @@ pub struct SystemChannels {
 }
 
 #[derive(Clone, Debug)]
+pub enum ActuatorStatus {
+    Normal,
+    Warning,
+    Emergency,
+}
+
+impl std::fmt::Display for ActuatorStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ActuatorStatus::Normal => write!(f, "Normal"),
+            ActuatorStatus::Warning => write!(f, "Warning"),
+            ActuatorStatus::Emergency => write!(f, "Emergency"),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct ActuatorFeedback {
-    #[allow(dead_code)]
     pub timestamp: std::time::Instant,
-    #[allow(dead_code)]
-    pub commands: Vec<f32>,
-    pub status: String,
+    pub actuator_name: String,
+    pub error: f32,
+    pub control: f32,
+    pub status: ActuatorStatus,
+    pub cycle_id: u64,
 }
 
 impl SystemChannels {
