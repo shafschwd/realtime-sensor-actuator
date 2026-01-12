@@ -7,3 +7,5 @@
 /.idea/realtime-sensor-actuator.iml
 /.idea/vcs.xml
 /.idea/.gitignore
+/scripts/
+/.copilot/

@@ -1,14 +1,14 @@
-# System configuration for the realtime sensor-actuator system
-[system]
-sample_rate_hz = 100
-window_size = 5
-anomaly_threshold = 2.5
+# Real-Time Sensor-Actuator System Configuration
+# =============================================
 
-[actuator]
-p_gain = 1.0
-i_gain = 0.0
-d_gain = 0.0
+# Sensor sampling interval in milliseconds
+sensor_interval_ms = 10
 
-[ipc]
-channel_capacity = 1024
+# Processing deadline in milliseconds (0.2ms = 200μs)
+processing_deadline_ms = 0.2
 
+# Transmission deadline in milliseconds (0.1ms = 100μs)
+transmission_deadline_ms = 0.1
+
+# Enable fail-safe mode when deadlines are missed
+fail_safe_enabled = true
