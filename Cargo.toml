@@ -2,53 +2,22 @@
 name = "realtime-sensor-actuator"
 version = "0.1.0"
 edition = "2021"
+description = "Real-time sensor-actuator system with deadline tracking"
 
 [dependencies]
-# Async runtime (choose one implementation path)
-tokio = { version = "1.41", features = ["full"] }
-
 # Threading and concurrency
-crossbeam = "0.8"           # Lock-free channels, epoch GC
-rayon = "1.10"              # Optional parallel iterators
-
-# Synchronization primitives
-parking_lot = "0.12"        # Faster Mutex/RwLock than std
+crossbeam = "0.8"
+parking_lot = "0.12"
 
 # Random number generation
 rand = "0.8"
-
-# Logging and tracing
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Configuration
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 
-# Statistics and analysis
-hdrhistogram = "7.5"        # Low-overhead latency recording
-
-# Time utilities
-chrono = "0.4"
-
-# Visualization (optional for advanced feature)
-plotters = "0.3"            # For charts
-# egui = "0.29"             # For live dashboard (uncomment if implementing)
-# eframe = "0.29"           # egui framework support
-
-# Message broker clients (optional for distinction-level)
-# lapin = "2.3"             # RabbitMQ client
-# rumqttc = "0.24"          # MQTT client
-# zeromq = "0.10"           # ZeroMQ bindings
-
-[dev-dependencies]
-criterion = { version = "0.5", features = ["async_tokio"] }
-
-[[bench]]
-name = "system_benchmark"
-harness = false
+# Statistics
+hdrhistogram = "7.5"
 
 [profile.release]
 opt-level = 3
-lto = true
-codegen-units = 1

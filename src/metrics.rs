@@ -1,7 +1,13 @@
+//! Metrics module - Performance tracking and statistics
+
 use hdrhistogram::Histogram;
 use std::time::Duration;
 use parking_lot::Mutex;
 use std::sync::Arc;
+
+// ============================================================================
+// TIMING METRICS - Thread-safe performance tracking
+// ============================================================================
 
 #[derive(Clone)]
 pub struct TimingMetrics {
@@ -9,7 +15,6 @@ pub struct TimingMetrics {
     processing_hist: Arc<Mutex<Histogram<u64>>>,
     transmission_hist: Arc<Mutex<Histogram<u64>>>,
     e2e_hist: Arc<Mutex<Histogram<u64>>>,
-    missed_deadlines: Arc<Mutex<u64>>,
 }
 
 impl TimingMetrics {
@@ -19,7 +24,6 @@ impl TimingMetrics {
             processing_hist: Arc::new(Mutex::new(Histogram::new(3).unwrap())),
             transmission_hist: Arc::new(Mutex::new(Histogram::new(3).unwrap())),
             e2e_hist: Arc::new(Mutex::new(Histogram::new(3).unwrap())),
-            missed_deadlines: Arc::new(Mutex::new(0)),
         }
     }
 
@@ -27,13 +31,8 @@ impl TimingMetrics {
         self.generation_hist.lock().record(duration.as_nanos() as u64).ok();
     }
 
-    pub fn record_processing(&self, duration: Duration, deadline_ns: u64) {
-        let nanos = duration.as_nanos() as u64;
-        self.processing_hist.lock().record(nanos).ok();
-
-        if nanos > deadline_ns {
-            *self.missed_deadlines.lock() += 1;
-        }
+    pub fn record_processing(&self, duration: Duration) {
+        self.processing_hist.lock().record(duration.as_nanos() as u64).ok();
     }
 
     pub fn record_transmission(&self, duration: Duration) {
@@ -47,7 +46,6 @@ impl TimingMetrics {
     pub fn report(&self) -> MetricsReport {
         let gen = self.generation_hist.lock();
         let proc = self.processing_hist.lock();
-        let trans = self.transmission_hist.lock();
         let e2e = self.e2e_hist.lock();
 
         MetricsReport {
@@ -55,13 +53,15 @@ impl TimingMetrics {
             generation_p99: Duration::from_nanos(gen.value_at_quantile(0.99)),
             processing_p50: Duration::from_nanos(proc.value_at_quantile(0.5)),
             processing_p99: Duration::from_nanos(proc.value_at_quantile(0.99)),
-            transmission_p50: Duration::from_nanos(trans.value_at_quantile(0.5)),
             e2e_p50: Duration::from_nanos(e2e.value_at_quantile(0.5)),
             e2e_p99: Duration::from_nanos(e2e.value_at_quantile(0.99)),
-            missed_deadlines: *self.missed_deadlines.lock(),
         }
     }
 }
+
+// ============================================================================
+// METRICS REPORT - Summary statistics
+// ============================================================================
 
 #[derive(Debug)]
 pub struct MetricsReport {
@@ -69,9 +69,7 @@ pub struct MetricsReport {
     pub generation_p99: Duration,
     pub processing_p50: Duration,
     pub processing_p99: Duration,
-    #[allow(dead_code)]
-    pub transmission_p50: Duration,
     pub e2e_p50: Duration,
     pub e2e_p99: Duration,
-    pub missed_deadlines: u64,
 }
+

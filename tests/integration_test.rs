@@ -1,4 +1,4 @@
-use realtime_sensor_actuator::sensor::generator::SensorGenerator;
+use realtime_sensor_actuator::SensorGenerator;
 
 #[test]
 fn generate_sensor_data() {

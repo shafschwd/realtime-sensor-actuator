@@ -1,6 +1,5 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use realtime_sensor_actuator::sensor::generator::SensorGenerator;
-use realtime_sensor_actuator::actuator::controller::PIDController;
+use realtime_sensor_actuator::{SensorGenerator, PIDController};
 
 fn benchmark_sensor_generation(c: &mut Criterion) {
     let mut gen = SensorGenerator::new(42);
